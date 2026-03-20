@@ -1,10 +1,14 @@
 #!/bin/bash
 # neuroUI-brand.sh
+# Applies neuroUI OS branding to your Arch install
 # Run with sudo!
 
 set -e
 
-ICON_SRC="$HOME/Downloads/icon.png"
+echo ":: Fetching neuroUI icon from GitHub..."
+ICON_SRC="/tmp/neuroui-icon.png"
+curl -fsSL https://raw.githubusercontent.com/neuroticorchid/an-empty-repository/main/neuroUI/icon.png -o "$ICON_SRC"
+
 ICON_DEST="/usr/share/pixmaps/neuroui.png"
 KDE_LOGO_DEST="/usr/share/plasma/look-and-feel/org.kde.breezedark.desktop/contents/assets/logo.png"
 
@@ -25,18 +29,18 @@ BUG_REPORT_URL="https://github.com/neuroticorchid"
 LOGO=neuroui
 EOF
 
-# --- /etc/lsb-release (for tools that read this) ---
+# --- /etc/lsb-release ---
 sudo tee /etc/lsb-release > /dev/null <<EOF
 DISTRIB_ID=neuroUI
 DISTRIB_RELEASE=rolling
-DISTRIB_DESCRIPTION="neuroUI is a Neuro-sama fan-made Operating System based on Arch Linux"
+DISTRIB_DESCRIPTION="neuroUI (based on Arch Linux)"
 EOF
 
 # --- Copy icon ---
 sudo cp "$ICON_SRC" "$ICON_DEST"
 echo ":: Icon copied to $ICON_DEST"
 
-# --- KDE About This System logo (optional, skip if path doesn't exist) ---
+# --- KDE About This System logo ---
 if [ -f "$KDE_LOGO_DEST" ]; then
     sudo cp "$ICON_SRC" "$KDE_LOGO_DEST"
     echo ":: KDE logo replaced"
@@ -44,12 +48,18 @@ else
     echo ":: KDE logo path not found, skipping (non-critical)"
 fi
 
-# --- fastfetch custom logo (if you use an image logo) ---
+# --- fastfetch hint ---
 FASTFETCH_CONFIG="$HOME/.config/fastfetch/config.jsonc"
 if [ -f "$FASTFETCH_CONFIG" ]; then
-    echo ":: fastfetch config found — you may want to set logo.source to $ICON_DEST manually"
+    echo ""
+    echo ":: fastfetch config detected!"
+    echo "   Add this to your config.jsonc to use the neuroUI icon:"
+    echo '   "logo": { "source": "/usr/share/pixmaps/neuroui.png", "type": "kitty" }'
 fi
+
+# --- Cleanup ---
+rm -f "$ICON_SRC"
 
 echo ""
 echo ":: neuroUI branding applied! (◕‿◕✿)"
-echo ":: Reboot or r
+echo ":: Reboot or re-login to see changes in KDE About This System."
